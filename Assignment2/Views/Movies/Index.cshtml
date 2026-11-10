@@ -1,5 +1,16 @@
-﻿@{
+﻿@using WebMatrix.Data
+
+
+@{
     ViewBag.Title = "Index Page";
+    var db = Database.Open("dvdrental");
+    var sql = "SELECT * FROM movies";
+    var data = db.Query(sql); 
 }
 
 <h2 class="">Index</h2>
+@foreach (var row in data)
+{
+    <p>@row.movie_id - @row.title - @row.release_year - @row.runtime_minutes - @row.classification - @row.rental_price- @row.description - @row.poster_filename</p>
+}
+
