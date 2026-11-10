@@ -4,13 +4,20 @@
 @{
     ViewBag.Title = "Index Page";
     var db = Database.Open("dvdrental");
-    var sql = "SELECT * FROM movies";
+    var sql = @"SELECT movies.movie_id,
+        movies.title,
+       genres.genre_name
+FROM movies
+JOIN movie_genres ON movies.movie_id = movie_genres.movie_id
+JOIN genres ON movie_genres.genre_id = genres.genre_id;";
     var data = db.Query(sql); 
 }
 
 <h2 class="">Index</h2>
 @foreach (var row in data)
 {
-    <p>@row.movie_id - @row.title - @row.release_year - @row.runtime_minutes - @row.classification - @row.rental_price- @row.description - @row.poster_filename</p>
+    
+   // <p>@row.movie_id - @row.title - @row.release_year - @row.runtime_minutes - @row.classification - @row.rental_price- @row.description - @row.poster_filename</p>
+   <p>@row.movie_id - @row.title - @row.genre_name</p>
 }
 
