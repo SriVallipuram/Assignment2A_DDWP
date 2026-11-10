@@ -1,17 +1,68 @@
 ﻿@using WebMatrix.Data
 
-
 @{
     ViewBag.Title = "Index Page";
     var db = Database.Open("dvdrental");
-    var sql = @"SELECT *
+
+    // Values typed by the user (empty on first load)
+    var titleSearch = "";
+    var genreSearch = "";
+    IEnumerable<dynamic> data;
+
+    if (IsPost)
+    {
+        // A search was submitted: read the form values
+        titleSearch = (Request.Form["titleSearch"] ?? "").Trim();
+        genreSearch = (Request.Form["genreSearch"] ?? "").Trim();
+
+        // An empty box means "don't filter on this field"
+        var sql = @"SELECT movies.movie_id, movies.title, movies.description,
+       movies.poster_filename, movies.rental_price, genres.genre_name
 FROM movies
 JOIN movie_genres ON movies.movie_id = movie_genres.movie_id
-JOIN genres ON movie_genres.genre_id = genres.genre_id;";
-    var data = db.Query(sql);
+JOIN genres ON movie_genres.genre_id = genres.genre_id
+WHERE (@0 = '' OR movies.title ILIKE '%' || @0 || '%')
+AND (@1 = '' OR genres.genre_name ILIKE '%' || @1 || '%')
+ORDER BY movies.title;";
+
+        data = db.Query(sql, titleSearch, genreSearch);
+    }
+    else
+    {
+        // Page opened normally: show everything
+        var sql = @"SELECT movies.movie_id, movies.title, movies.description,
+       movies.poster_filename, movies.rental_price, genres.genre_name
+FROM movies
+JOIN movie_genres ON movies.movie_id = movie_genres.movie_id
+JOIN genres ON movie_genres.genre_id = genres.genre_id
+ORDER BY movies.title;";
+
+        data = db.Query(sql);
+    }
 }
 
 <h2 class="text-center mt-4 mb-4 py-2">Movie Rental Library</h2>
+
+<form method="post" class="row g-3 mb-4">
+    <div class="col-md-5">
+        <label for="titleSearch" class="form-label">Movie title</label>
+        <input type="search" name="titleSearch" id="titleSearch" class="form-control" value="@titleSearch">
+    </div>
+    <div class="col-md-5">
+        <label for="genreSearch" class="form-label">Genre</label>
+        <input type="search" name="genreSearch" id="genreSearch" class="form-control" value="@genreSearch">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
+</form>
+
+@if (IsPost)
+{
+    <p class="text-muted">
+        Showing results for title "@titleSearch" and genre "@genreSearch"
+    </p>
+}
 
 <div class="row row-cols-1 row-cols-md-3 g-3">
     @foreach (var row in data)
