@@ -4,20 +4,31 @@
 @{
     ViewBag.Title = "Index Page";
     var db = Database.Open("dvdrental");
-    var sql = @"SELECT movies.movie_id,
-        movies.title,
-       genres.genre_name
+    var sql = @"SELECT *
 FROM movies
 JOIN movie_genres ON movies.movie_id = movie_genres.movie_id
 JOIN genres ON movie_genres.genre_id = genres.genre_id;";
-    var data = db.Query(sql); 
+    var data = db.Query(sql);
 }
 
-<h2 class="">Index</h2>
-@foreach (var row in data)
-{
-    
-   // <p>@row.movie_id - @row.title - @row.release_year - @row.runtime_minutes - @row.classification - @row.rental_price- @row.description - @row.poster_filename</p>
-   <p>@row.movie_id - @row.title - @row.genre_name</p>
-}
+<h2 class="text-center mt-4 mb-4 py-2">Movie Rental Library</h2>
 
+<div class="row row-cols-1 row-cols-md-3 g-3">
+    @foreach (var row in data)
+    {
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header">
+                    <p class="text-center fw-bold">@row.title - @row.genre_name</p>
+                </div>
+                <div class="card-body">
+                    <img src="https://picsum.photos/100/50" alt="@row.poster_filename" class="card-img-top">
+                    <p>@row.description</p>
+                </div>
+                <div class="card-footer">
+                    <p>$ @row.rental_price</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
