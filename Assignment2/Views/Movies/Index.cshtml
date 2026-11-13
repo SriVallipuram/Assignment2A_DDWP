@@ -9,13 +9,16 @@
     var genreSearch = "";
     IEnumerable<dynamic> data;
 
+    // All genres for the dropdown (separate from the movie results)
+    var genres = db.Query("SELECT genre_name FROM genres ORDER BY genre_name");
+
     if (IsPost)
     {
         // A search was submitted: read the form values
         titleSearch = (Request.Form["titleSearch"] ?? "").Trim();
         genreSearch = (Request.Form["genreSearch"] ?? "").Trim();
 
-        // An empty box means "don't filter on this field"
+        // An empty box means no value for this parameter.
         var sql = @"SELECT movies.movie_id, movies.title, movies.description,
        movies.poster_filename, movies.rental_price, genres.genre_name
 FROM movies
@@ -46,11 +49,17 @@ ORDER BY movies.title;";
 <form method="post" class="row g-3 mb-4">
     <div class="col-md-5">
         <label for="titleSearch" class="form-label">Movie title</label>
-        <input type="search" name="titleSearch" id="titleSearch" class="form-control" value="@titleSearch">
+        <input type="text" name="titleSearch" id="titleSearch" class="form-control" value="@titleSearch">
     </div>
     <div class="col-md-5">
         <label for="genreSearch" class="form-label">Genre</label>
-        <input type="search" name="genreSearch" id="genreSearch" class="form-control" value="@genreSearch">
+        <select name="genreSearch" id="genreSearch" class="form-select">
+            <option value="">All genres</option>
+            @foreach (var g in genres)
+            {
+                <option value="@g.genre_name" selected="@(g.genre_name == genreSearch)">@g.genre_name</option>
+            }
+        </select>
     </div>
     <div class="col-md-2 d-flex align-items-end">
         <button type="submit" class="btn btn-primary w-100">Search</button>
@@ -76,8 +85,9 @@ ORDER BY movies.title;";
                     <img src="https://picsum.photos/100/50" alt="@row.poster_filename" class="card-img-top">
                     <p>@row.description</p>
                 </div>
-                <div class="card-footer">
+                <div class="card-footer d-flex justify-content-between  ">
                     <p>$ @row.rental_price</p>
+                    <button class="btn btn-primary rounded-1" type="submit">More Details</button>
                 </div>
             </div>
         </div>
