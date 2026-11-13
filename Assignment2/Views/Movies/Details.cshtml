@@ -37,6 +37,22 @@
                    "GROUP BY stores.store_id, stores.store_name, stores.suburb " +
                    "ORDER BY stores.store_name";
     var storedata = dtldb.Query(storesql, movie_id);
+    
+    // Rental info of copies with stores & customers 
+    // One row per store; details holds one text line per rented-out copy, separated by '|'
+    var copysql = "SELECT stores.store_name, stores.suburb, COUNT(*) AS rented_count, " +
+                  "string_agg('Copy #' || copies.copy_id || ' - ' || customers.first_name || ' ' || customers.last_name || " +
+                  "' (due ' || to_char(rental_items.due_date, 'DD/MM/YYYY') || ') - ' || customers.email || ' - ' || COALESCE(customers.phone, 'no phone'), '|' ORDER BY rental_items.due_date) AS details " +
+                  "FROM copies " +
+                  "JOIN rental_items ON copies.copy_id = rental_items.copy_id " +
+                  "JOIN rentals ON rental_items.rental_id = rentals.rental_id " +
+                  "JOIN customers ON rentals.customer_id = customers.customer_id " +
+                  "JOIN stores ON copies.store_id = stores.store_id " +
+                  "WHERE copies.movie_id = @0 AND rental_items.return_date IS NULL " +
+                  "GROUP BY stores.store_id, stores.store_name, stores.suburb " +
+                  "ORDER BY stores.store_name";
+    var rentaldata = new List<dynamic>(dtldb.Query(copysql, movie_id));   // a List so we can check .Count
+
 }
 
 @foreach (var dtlrow in dtldata)
@@ -83,11 +99,40 @@
                     </div>
                 </div>
             </li>
-        </ul>
-        <div class="card-body">
-            <a href="#" class="card-link">Card link</a>
-            <a href="#" class="card-link">Another link</a>
+            
+    <li class="list-group-item">
+    <div class="row">
+        <div class="col-md-6 fw-bolder">Rental Information</div>
+        <div class="col-md-6">
+            @if (rentaldata.Count == 0)
+            {
+                <p class="mb-0 text-muted">No copies currently rented out.</p>
+            }
+            <div class="row row-cols-1 row-cols-lg-2 g-2">
+                @foreach (var rent in rentaldata)
+                {
+                    var lines = ((string)rent.details).Split('|');
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold">@rent.store_name, @rent.suburb</div>
+                            <div class="card-body py-2">
+                                <p class="mb-1 small">@rent.rented_count rented out</p>
+                                <ul class="mb-0 small">
+                                    @foreach (var line in lines)
+                                    {
+                                        <li>@line</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
+    </div>
+    </li>
+        </ul>
+        
     </div>
 }
 
