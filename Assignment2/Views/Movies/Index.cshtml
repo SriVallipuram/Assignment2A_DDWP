@@ -90,7 +90,7 @@ ORDER BY movies.title;";
                     <p class="text-center fw-bold">@row.title - @row.genre_name</p>
                 </div>
                 <div class="card-body">
-                    <img src="https://picsum.photos/100/50" alt="@row.poster_filename" class="card-img-top">
+                    <img src="@Url.Content("~/Content/images/poster-placeholder.svg")" alt="@row.poster_filename" class="card-img-top">
                     <p>@row.description</p>
                 </div>
                 <div class="card-footer d-flex justify-content-between  ">

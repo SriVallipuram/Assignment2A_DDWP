@@ -10,9 +10,33 @@
     // The movie id arrives in the URL: /Movies/Details?id=5
     int movie_id = Request.QueryString["id"].AsInt();
 
-    var dtlsql = "SELECT * FROM movies" +
-                 " WHERE movie_id = @0";
+    // One row per movie; string_agg puts all its genres in one value (genre_name).
+   
+    var dtlsql = "SELECT movies.*, " +
+                 "string_agg(genres.genre_name, ', ' ORDER BY genres.genre_name) AS genre_name " +
+                 "FROM movies " +
+                 "JOIN movie_genres ON movies.movie_id = movie_genres.movie_id " +
+                 "JOIN genres ON movie_genres.genre_id = genres.genre_id " +
+                 "WHERE movies.movie_id = @0 " +
+                 "GROUP BY movies.movie_id";
     var dtldata = dtldb.Query(dtlsql, movie_id);
+
+    // Cast for this movie (separate query)
+    var castsql = "SELECT actors.first_name, actors.last_name, movie_actors.character_name " +
+                  "FROM movie_actors " +
+                  "JOIN actors ON movie_actors.actor_id = actors.actor_id " +
+                  "WHERE movie_actors.movie_id = @0 " +
+                  "ORDER BY actors.last_name";
+    var castdata = dtldb.Query(castsql, movie_id);
+
+    // Stores that hold a copy of this movie, with the number of copies (separate query)
+    var storesql = "SELECT stores.store_name, stores.suburb, COUNT(copies.copy_id) AS copy_count " +
+                   "FROM copies " +
+                   "JOIN stores ON copies.store_id = stores.store_id " +
+                   "WHERE copies.movie_id = @0 AND copies.retired = false " +
+                   "GROUP BY stores.store_id, stores.store_name, stores.suburb " +
+                   "ORDER BY stores.store_name";
+    var storedata = dtldb.Query(storesql, movie_id);
 }
 
 @foreach (var dtlrow in dtldata)
@@ -23,17 +47,42 @@
     <br/>
     
     <div class="card w-100">
-        <img class="card-img-top" src=".../100px180/?text=Image cap" alt="Card image cap">
+        <img class="card-img-top" src="@Url.Content("~/Content/images/poster-placeholder.svg")" alt="@dtlrow.poster_filename" style="max-height: 400px; object-fit: cover;">
         <div class="card-body">
             <h1 class="card-title">@dtlrow.title</h1>
+            <h4 class="card-title">@dtlrow.genre_name</h4>
             <h6 class="card-title">Year @dtlrow.release_year </h6>
             <h6 class="card-title">@dtlrow.runtime_minutes mintes</h6>
             <p class="card-text">@dtlrow.description</p>
         </div>
         <ul class="list-group list-group-flush">
-            <li class="list-group-item">Cras justo odio</li>
-            <li class="list-group-item">Dapibus ac facilisis in</li>
-            <li class="list-group-item">Vestibulum at eros</li>
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-md-6 fw-bolder">Cast &amp; Crew</div>
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            @foreach (var actor in castdata)
+                            {
+                                <li>@actor.first_name @actor.last_name as @actor.character_name</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                </li>
+            
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-md-6 fw-bolder">Available Stores</div>
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            @foreach (var store in storedata)
+                            {
+                                <li>@store.store_name, @store.suburb (@store.copy_count available)</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </li>
         </ul>
         <div class="card-body">
             <a href="#" class="card-link">Card link</a>
