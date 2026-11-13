@@ -19,13 +19,18 @@
         genreSearch = (Request.Form["genreSearch"] ?? "").Trim();
 
         // An empty box means no value for this parameter.
+        // string_agg joins all of a movie's genres into one value, one row per movie.
+        // HAVING keeps a movie if ANY of its genres matches, while still showing all of them.
         var sql = @"SELECT movies.movie_id, movies.title, movies.description,
-       movies.poster_filename, movies.rental_price, genres.genre_name
+       movies.poster_filename, movies.rental_price,
+       string_agg(genres.genre_name, ', ' ORDER BY genres.genre_name) AS genre_name
 FROM movies
 JOIN movie_genres ON movies.movie_id = movie_genres.movie_id
 JOIN genres ON movie_genres.genre_id = genres.genre_id
 WHERE (@0 = '' OR movies.title ILIKE '%' || @0 || '%')
-AND (@1 = '' OR genres.genre_name ILIKE '%' || @1 || '%')
+GROUP BY movies.movie_id, movies.title, movies.description,
+         movies.poster_filename, movies.rental_price
+HAVING (@1 = '' OR bool_or(genres.genre_name ILIKE '%' || @1 || '%'))
 ORDER BY movies.title;";
 
         data = db.Query(sql, titleSearch, genreSearch);
@@ -34,10 +39,13 @@ ORDER BY movies.title;";
     {
         // Page opened normally: show everything
         var sql = @"SELECT movies.movie_id, movies.title, movies.description,
-       movies.poster_filename, movies.rental_price, genres.genre_name
+       movies.poster_filename, movies.rental_price,
+       string_agg(genres.genre_name, ', ' ORDER BY genres.genre_name) AS genre_name
 FROM movies
 JOIN movie_genres ON movies.movie_id = movie_genres.movie_id
 JOIN genres ON movie_genres.genre_id = genres.genre_id
+GROUP BY movies.movie_id, movies.title, movies.description,
+         movies.poster_filename, movies.rental_price
 ORDER BY movies.title;";
 
         data = db.Query(sql);
@@ -87,7 +95,7 @@ ORDER BY movies.title;";
                 </div>
                 <div class="card-footer d-flex justify-content-between  ">
                     <p>$ @row.rental_price</p>
-                    <button class="btn btn-primary rounded-1" type="submit">More Details</button>
+                    <a href="/Movies/Details?id=@row.movie_id" class="btn btn-primary">More Details</a>
                 </div>
             </div>
         </div>

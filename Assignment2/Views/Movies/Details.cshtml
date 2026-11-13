@@ -1,5 +1,44 @@
-﻿@{
+﻿@using WebMatrix.Data
+@{
     ViewBag.Title = "Details Page";
+    ViewBag.FullWidth = true;   // the layout switches to a full-width container
 }
 
 <h2>Details</h2>
+@{
+    var dtldb = Database.Open("dvdrental");
+    // The movie id arrives in the URL: /Movies/Details?id=5
+    int movie_id = Request.QueryString["id"].AsInt();
+
+    var dtlsql = "SELECT * FROM movies" +
+                 " WHERE movie_id = @0";
+    var dtldata = dtldb.Query(dtlsql, movie_id);
+}
+
+@foreach (var dtlrow in dtldata)
+{
+    <p>@dtlrow.movie_id</p>
+    <p>@dtlrow.title</p>
+    <p>@dtlrow.description</p>
+    <br/>
+    
+    <div class="card w-100">
+        <img class="card-img-top" src=".../100px180/?text=Image cap" alt="Card image cap">
+        <div class="card-body">
+            <h1 class="card-title">@dtlrow.title</h1>
+            <h6 class="card-title">Year @dtlrow.release_year </h6>
+            <h6 class="card-title">@dtlrow.runtime_minutes mintes</h6>
+            <p class="card-text">@dtlrow.description</p>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+        </ul>
+        <div class="card-body">
+            <a href="#" class="card-link">Card link</a>
+            <a href="#" class="card-link">Another link</a>
+        </div>
+    </div>
+}
+

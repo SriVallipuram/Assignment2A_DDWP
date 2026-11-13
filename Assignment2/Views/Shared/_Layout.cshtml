@@ -49,7 +49,7 @@
 </nav>
 
 
-<div class="container body-content">
+<div class="@(ViewBag.FullWidth == true ? "container-fluid px-4" : "container") body-content">
     @RenderBody()
     <hr/>
     <footer>
