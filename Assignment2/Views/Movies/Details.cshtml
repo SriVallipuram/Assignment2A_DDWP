@@ -4,7 +4,10 @@
     ViewBag.FullWidth = true;   // the layout switches to a full-width container
 }
 
-<h2>Details</h2>
+<div class="d-flex justify-content-between align-items-center mb-3" ><h2>Details</h2>
+    <a href="/Movies/Index/" class="btn btn-primary">Back</a>
+</div>
+
 @{
     var dtldb = Database.Open("dvdrental");
     // The movie id arrives in the URL: /Movies/Details?id=5
@@ -41,7 +44,7 @@
     // Rental info of copies with stores & customers 
     // One row per store; details holds one text line per rented-out copy, separated by '|'
     var copysql = "SELECT stores.store_name, stores.suburb, COUNT(*) AS rented_count, " +
-                  "string_agg('Copy #' || copies.copy_id || ' - ' || customers.first_name || ' ' || customers.last_name || " +
+                  "string_agg('Copy # ' || copies.copy_id || ' - ' || customers.first_name || ' ' || customers.last_name || " +
                   "' (due ' || to_char(rental_items.due_date, 'DD/MM/YYYY') || ') - ' || customers.email || ' - ' || COALESCE(customers.phone, 'no phone'), '|' ORDER BY rental_items.due_date) AS details " +
                   "FROM copies " +
                   "JOIN rental_items ON copies.copy_id = rental_items.copy_id " +
@@ -57,11 +60,6 @@
 
 @foreach (var dtlrow in dtldata)
 {
-    <p>@dtlrow.movie_id</p>
-    <p>@dtlrow.title</p>
-    <p>@dtlrow.description</p>
-    <br/>
-    
     <div class="card w-100">
         <img class="card-img-top" src="@Url.Content("~/Content/images/poster-placeholder.svg")" alt="@dtlrow.poster_filename" style="max-height: 400px; object-fit: cover;">
         <div class="card-body">
