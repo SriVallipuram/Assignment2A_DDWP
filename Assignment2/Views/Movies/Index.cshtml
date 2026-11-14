@@ -54,12 +54,12 @@ ORDER BY movies.title;";
 
 <h2 class="text-center mt-4 mb-4 py-2">Movie Rental Library</h2>
 
-<form method="post" class="row g-3 mb-4">
-    <div class="col-md-5">
+<form method="post" class="d-flex flex-wrap align-items-end gap-3 mb-4">
+    <div>
         <label for="titleSearch" class="form-label">Movie title</label>
         <input type="text" name="titleSearch" id="titleSearch" class="form-control" value="@titleSearch">
     </div>
-    <div class="col-md-5">
+    <div>
         <label for="genreSearch" class="form-label">Genre</label>
         <select name="genreSearch" id="genreSearch" class="form-select">
             <option value="">All genres</option>
@@ -69,8 +69,11 @@ ORDER BY movies.title;";
             }
         </select>
     </div>
-    <div class="col-md-2 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">Search</button>
+    <div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+    <div class="ms-auto">
+        <a href="/Movies/Create" class="btn btn-primary">Create</a>
     </div>
 </form>
 

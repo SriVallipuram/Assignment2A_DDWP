@@ -317,7 +317,7 @@
         <Content Include="Scripts\umd\popper.min.js" />
         <Content Include="Scripts\umd\popper.min.js.map" />
         <Content Include="Views\Movies\Details.cshtml" />
-        <Content Include="Views\Movies\Edit.cshtml" />
+        <Content Include="Views\Movies\Create.cshtml" />
         <Content Include="Views\Movies\Index.cshtml" />
         <Content Include="Web.config" />
         <Content Include="Web.Debug.config">
